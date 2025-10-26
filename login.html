@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     body {
       background: linear-gradient(180deg, #89f7fe, #66a6ff);
@@ -44,15 +43,8 @@
       font-size: 15px;
     }
     button:hover { background: #388e3c; }
-    .link {
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    #msg {
-      margin-top: 10px;
-      font-size: 14px;
-      font-weight: bold;
-    }
+    .link { margin-top: 10px; font-size: 14px; }
+    #msg { margin-top: 10px; font-size: 14px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -68,7 +60,7 @@
   </div>
 
   <script>
-    const BASE_URL = "https://lappy-bird-backend.onrender.com"; // ✅ Backend FastAPI URL
+    const BASE_URL = "https://lappy-bird-backend.onrender.com"; // ✅ Backend URL
 
     async function login() {
       const username = document.getElementById("username").value.trim();
@@ -85,26 +77,24 @@
       msg.style.color = "black";
 
       try {
-        // ✅ Gọi đúng endpoint của FastAPI
-        const res = await fetch(`${BASE_URL}/login/`, {
+        const res = await fetch(`${BASE_URL}/login/`, {  // ✅ Có dấu / đúng chuẩn
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
         });
 
-        const data = await res.json();
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          data = { detail: "Máy chủ phản hồi không hợp lệ!" };
+        }
 
         if (res.ok) {
           msg.textContent = "✅ " + (data.message || "Đăng nhập thành công!");
           msg.style.color = "green";
-
-          // 💾 Lưu username để các trang khác dùng
           localStorage.setItem("username", username);
-
-          // ⏳ Chuyển hướng sau 1 giây
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1000);
+          setTimeout(() => window.location.href = "index.html", 1000);
         } else {
           msg.textContent = "❌ " + (data.detail || "Sai tài khoản hoặc mật khẩu");
           msg.style.color = "red";
@@ -115,6 +105,11 @@
         msg.style.color = "red";
       }
     }
+
+    // 👇 Thêm: nhấn Enter để đăng nhập
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
   </script>
 </body>
 </html>
