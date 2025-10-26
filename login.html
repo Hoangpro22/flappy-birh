@@ -8,27 +8,51 @@
   <style>
     body {
       background: linear-gradient(180deg, #89f7fe, #66a6ff);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      height: 100vh; font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+      margin: 0;
     }
     .form-box {
-      background: #fff; padding: 30px; border-radius: 15px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      width: 300px; text-align: center;
+      width: 300px;
+      text-align: center;
     }
     input {
-      width: 100%; padding: 10px; margin: 8px 0;
-      border: 1px solid #ccc; border-radius: 8px;
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
     }
     button {
-      background: #4caf50; color: white;
-      border: none; padding: 10px 20px;
-      border-radius: 8px; cursor: pointer;
-      width: 100%; font-weight: bold;
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      font-size: 15px;
     }
     button:hover { background: #388e3c; }
-    .link { margin-top: 10px; }
+    .link {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #msg {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -44,16 +68,25 @@
   </div>
 
   <script>
-    const API_URL = "https://lappy-bird-backend.onrender.com/login"; // ⚙️ Backend FastAPI
+    const BASE_URL = "https://lappy-bird-backend.onrender.com"; // ✅ Backend FastAPI URL
 
     async function login() {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const msg = document.getElementById("msg");
+
+      if (!username || !password) {
+        msg.textContent = "⚠️ Vui lòng nhập đầy đủ thông tin!";
+        msg.style.color = "red";
+        return;
+      }
+
       msg.textContent = "⏳ Đang xử lý...";
+      msg.style.color = "black";
 
       try {
-        const res = await fetch(`${API_URL}/login`, {
+        // ✅ Gọi đúng endpoint của FastAPI
+        const res = await fetch(`${BASE_URL}/login/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
@@ -62,22 +95,24 @@
         const data = await res.json();
 
         if (res.ok) {
-          msg.textContent = "✅ " + data.message;
+          msg.textContent = "✅ " + (data.message || "Đăng nhập thành công!");
           msg.style.color = "green";
 
-          // 💾 Lưu username để game và index lấy
+          // 💾 Lưu username để các trang khác dùng
           localStorage.setItem("username", username);
 
-          console.log("Đăng nhập thành công -> chuyển sang index.html");
-          window.location.href = "index.html"; // 🔥 Chuyển ngay
+          // ⏳ Chuyển hướng sau 1 giây
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1000);
         } else {
-          msg.textContent = "❌ " + data.detail;
+          msg.textContent = "❌ " + (data.detail || "Sai tài khoản hoặc mật khẩu");
           msg.style.color = "red";
         }
       } catch (err) {
+        console.error(err);
         msg.textContent = "⚠️ Lỗi kết nối máy chủ!";
         msg.style.color = "red";
-        console.error(err);
       }
     }
   </script>
