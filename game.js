@@ -183,5 +183,34 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
+const BASE_URL = "https://lappy-bird-backend.onrender.com";
+// ... toàn bộ code game như bạn gửi, chỉ cần thay URL trong sendScore & showLeaderboard:
+async function sendScore(name, score) {
+  try {
+    const res = await fetch(`${BASE_URL}/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, score }),
+    });
+    console.log("✅ Gửi điểm:", await res.json());
+  } catch (err) {
+    console.error("❌ Không thể gửi điểm:", err);
+  }
+}
+
+async function showLeaderboard() {
+  document.getElementById("leaderboard").classList.remove("hidden");
+  const list = document.getElementById("leaderboardList");
+  list.innerHTML = "<li>⏳ Đang tải...</li>";
+
+  try {
+    const res = await fetch(`${BASE_URL}/scores`);
+    const data = await res.json();
+    list.innerHTML = data.map((p, i) => `<li>${i + 1}. ${p.name} — ${p.score}</li>`).join("");
+  } catch {
+    list.innerHTML = "<li>Lỗi khi tải bảng xếp hạng 😢</li>";
+  }
+}
 
 draw();
+
