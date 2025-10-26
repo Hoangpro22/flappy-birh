@@ -1,6 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// 🌐 API Backend Render
+const BASE_URL = "https://lappy-bird-backend.onrender.com";
+
 // 🖼️ Ảnh
 const bg = new Image(); bg.src = "assets/bg.png";
 const birdImg = new Image(); birdImg.src = "assets/bird.png";
@@ -44,14 +47,15 @@ function resetGame() {
   draw();
 }
 
-// 📤 Gửi điểm lên server (backend của bạn)
+// 📤 Gửi điểm lên server
 async function sendScore(name, score) {
   try {
-    const res = await fetch("https://lappy-bird-backend.onrender.com/submit", {
+    const res = await fetch(`${BASE_URL}/submit/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, score }),
     });
+    if (!res.ok) throw new Error("Gửi điểm thất bại");
     console.log("✅ Gửi điểm thành công:", await res.json());
   } catch (err) {
     console.error("❌ Không thể gửi điểm:", err);
@@ -68,7 +72,7 @@ function showGameOver() {
   ctx.font = "24px Arial";
   ctx.fillText(`Điểm: ${score}`, canvas.width / 2 - 60, canvas.height / 2 + 20);
 
-  // 🟢 Tự động lưu điểm bằng username đăng nhập
+  // 🟢 Lưu điểm nếu đã đăng nhập
   const username = localStorage.getItem("username");
   if (username) {
     sendScore(username, score);
@@ -85,14 +89,14 @@ document.getElementById("closeLeaderboard").addEventListener("click", () => {
   document.getElementById("leaderboard").classList.add("hidden");
 });
 
-// 🏆 Bảng xếp hạng
+// 🏆 Hiển thị bảng xếp hạng
 async function showLeaderboard() {
   document.getElementById("leaderboard").classList.remove("hidden");
   const list = document.getElementById("leaderboardList");
   list.innerHTML = "<li>⏳ Đang tải...</li>";
 
   try {
-    const res = await fetch("https://lappy-bird-backend.onrender.com/scores");
+    const res = await fetch(`${BASE_URL}/scores/`);
     if (!res.ok) throw new Error("Lỗi HTTP: " + res.status);
     const data = await res.json();
     list.innerHTML = data
