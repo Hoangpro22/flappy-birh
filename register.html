@@ -5,13 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Đăng ký</title>
   <style>
-    body { background: linear-gradient(180deg,#ffecd2,#fcb69f);
-      display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;}
-    .form-box{background:#fff;padding:30px;border-radius:15px;box-shadow:0 4px 10px rgba(0,0,0,0.2);width:300px;text-align:center;}
-    input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:8px;}
-    button{background:#2196f3;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;width:100%;font-weight:bold;}
-    button:hover{background:#1976d2;}
-    .link{margin-top:10px;}
+    body {
+      background: linear-gradient(180deg, #ffecd2, #fcb69f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+    .form-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 300px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1976d2;
+    }
+    .link {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -35,12 +67,19 @@
       const msg = document.getElementById("msg");
       msg.textContent = "⏳ Đang xử lý...";
 
+      if (!username || !password) {
+        msg.textContent = "⚠️ Vui lòng nhập đủ thông tin!";
+        msg.style.color = "red";
+        return;
+      }
+
       try {
-        const res = await fetch(`${BASE_URL}/register`, {
+        const res = await fetch(`${BASE_URL}/register/`, {  <!-- ✅ thêm dấu / -->
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username, password })
         });
+
         const data = await res.json();
 
         if (res.ok) {
@@ -48,10 +87,11 @@
           msg.style.color = "green";
           setTimeout(() => (window.location.href = "login.html"), 1000);
         } else {
-          msg.textContent = "❌ " + data.detail;
+          msg.textContent = "❌ " + (data.detail || "Lỗi đăng ký");
           msg.style.color = "red";
         }
-      } catch {
+      } catch (err) {
+        console.error(err);
         msg.textContent = "⚠️ Lỗi kết nối máy chủ!";
         msg.style.color = "red";
       }
