@@ -28,7 +28,7 @@ function flap() {
 // 🖱️ + 📱 Sự kiện điều khiển — fix lỗi nhảy 2 lần
 if ("ontouchstart" in window) {
   canvas.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // chặn mousedown ảo
+    e.preventDefault();
     flap();
   }, { passive: false });
 } else {
@@ -72,7 +72,6 @@ function showGameOver() {
   ctx.font = "24px Arial";
   ctx.fillText(`Điểm: ${score}`, canvas.width / 2 - 60, canvas.height / 2 + 20);
 
-  // 🟢 Lưu điểm nếu đã đăng nhập
   const username = localStorage.getItem("username");
   if (username) {
     sendScore(username, score);
@@ -82,9 +81,9 @@ function showGameOver() {
   }
 }
 
-// 🔁 Nút chức năng
+// 🔘 Nút chức năng
 document.getElementById("restartBtn").addEventListener("click", resetGame);
-document.getElementById("leaderboardBtn").addEventListener("click", async () => showLeaderboard());
+document.getElementById("leaderboardBtn").addEventListener("click", showLeaderboard);
 document.getElementById("closeLeaderboard").addEventListener("click", () => {
   document.getElementById("leaderboard").classList.add("hidden");
 });
@@ -115,7 +114,6 @@ const closeSettings = document.getElementById("closeSettings");
 
 settingsBtn.addEventListener("click", () => settingsMenu.classList.remove("hidden"));
 closeSettings.addEventListener("click", () => settingsMenu.classList.add("hidden"));
-
 document.getElementById("homeBtn").addEventListener("click", () => window.location.href = "index.html");
 document.getElementById("backBtn").addEventListener("click", () => history.back());
 document.getElementById("resetBtn").addEventListener("click", () => {
@@ -143,7 +141,7 @@ function draw() {
 
   if (gameOver) return;
 
-  // Vẽ ống
+  // Ống
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
     ctx.drawImage(pipeImg, p.x, p.y, 60, 300);
@@ -183,34 +181,5 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
-const BASE_URL = "https://lappy-bird-backend.onrender.com";
-// ... toàn bộ code game như bạn gửi, chỉ cần thay URL trong sendScore & showLeaderboard:
-async function sendScore(name, score) {
-  try {
-    const res = await fetch(`${BASE_URL}/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, score }),
-    });
-    console.log("✅ Gửi điểm:", await res.json());
-  } catch (err) {
-    console.error("❌ Không thể gửi điểm:", err);
-  }
-}
-
-async function showLeaderboard() {
-  document.getElementById("leaderboard").classList.remove("hidden");
-  const list = document.getElementById("leaderboardList");
-  list.innerHTML = "<li>⏳ Đang tải...</li>";
-
-  try {
-    const res = await fetch(`${BASE_URL}/scores`);
-    const data = await res.json();
-    list.innerHTML = data.map((p, i) => `<li>${i + 1}. ${p.name} — ${p.score}</li>`).join("");
-  } catch {
-    list.innerHTML = "<li>Lỗi khi tải bảng xếp hạng 😢</li>";
-  }
-}
 
 draw();
-
