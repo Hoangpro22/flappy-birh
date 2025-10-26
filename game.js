@@ -47,7 +47,7 @@ function resetGame() {
 // 📤 Gửi điểm lên server (backend của bạn)
 async function sendScore(name, score) {
   try {
-    const res = await fetch("http://127.0.0.1:10000/submit", {
+    const res = await fetch("https://lappy-bird-backend.onrender.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, score }),
@@ -92,7 +92,7 @@ async function showLeaderboard() {
   list.innerHTML = "<li>⏳ Đang tải...</li>";
 
   try {
-    const res = await fetch("http://127.0.0.1:10000/scores");
+    const res = await fetch("https://lappy-bird-backend.onrender.com/scores");
     if (!res.ok) throw new Error("Lỗi HTTP: " + res.status);
     const data = await res.json();
     list.innerHTML = data
