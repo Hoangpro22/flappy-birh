@@ -10,10 +10,10 @@ const birdImg = new Image(); birdImg.src = "assets/bird.png";
 const groundImg = new Image(); groundImg.src = "assets/ground.png";
 const pipeImg = new Image(); pipeImg.src = "assets/pipe.png";
 
-// 🔊 Âm thanh
-const flapSound = new Audio("assets/sounds/flap.wav");
-const hitSound = new Audio("assets/sounds/hit.wav");
-const scoreSound = new Audio("assets/sounds/score.wav");
+// 🔊 Âm thanh (đặt đúng đường dẫn)
+const flapSound = new Audio("sounds/flap.wav");
+const hitSound = new Audio("sounds/hit.wav");
+const scoreSound = new Audio("sounds/score.wav");
 
 // ⚙️ Biến game
 let birdX = 50, birdY = 200;
@@ -28,14 +28,14 @@ function flap() {
   } else if (!gameOver) {
     velocity = jump;
     flapSound.currentTime = 0;
-    flapSound.play();
+    flapSound.play(); // 🔊 phát âm thanh nhảy
   }
 }
 
-// 🖱️ + 📱 Sự kiện điều khiển — fix lỗi nhảy 2 lần
+// 🖱️ + 📱 Sự kiện điều khiển
 if ("ontouchstart" in window) {
   canvas.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // chặn mousedown ảo
+    e.preventDefault();
     flap();
   }, { passive: false });
 } else {
@@ -79,7 +79,6 @@ function showGameOver() {
   ctx.font = "24px Arial";
   ctx.fillText(`Điểm: ${score}`, canvas.width / 2 - 60, canvas.height / 2 + 20);
 
-  // 🟢 Lưu điểm nếu đã đăng nhập
   const username = localStorage.getItem("username");
   if (username) {
     sendScore(username, score);
@@ -158,21 +157,22 @@ function draw() {
 
     p.x -= 2;
     if (p.x === 200) pipes.push({ x: 400, y: Math.floor(Math.random() * -200) });
+
     if (p.x + 60 === birdX) {
       score++;
       scoreSound.currentTime = 0;
-      scoreSound.play();
+      scoreSound.play(); // 🔊 âm ghi điểm
     }
 
     // Va chạm
     if (
-  (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY <= p.y + 300) ||
-  (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY + 24 >= p.y + 420)
-) {
-  gameOver = true;
-  soundHit.currentTime = 0;
-  soundHit.play(); // 🔊 phát âm va chạm
-}
+      (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY <= p.y + 300) ||
+      (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY + 24 >= p.y + 420)
+    ) {
+      gameOver = true;
+      hitSound.currentTime = 0;
+      hitSound.play(); // 🔊 âm va chạm
+    }
   }
 
   if (pipes[0].x < -60) pipes.shift();
@@ -181,11 +181,10 @@ function draw() {
   birdY += velocity;
 
   if (birdY + 24 >= canvas.height - 100) {
-  gameOver = true;
-  soundHit.currentTime = 0;
-  soundHit.play(); // 🔊 phát âm khi rơi
-}
-
+    gameOver = true;
+    hitSound.currentTime = 0;
+    hitSound.play(); // 🔊 âm khi rơi
+  }
 
   ctx.drawImage(groundImg, 0, canvas.height - 100, canvas.width, 100);
   ctx.drawImage(birdImg, birdX, birdY, 50, 35);
