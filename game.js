@@ -14,7 +14,7 @@ const pipeImg = new Image(); pipeImg.src = "assets/pipe.png";
 const flapSound = new Audio("sounds/flap.mp3");
 const hitSound = new Audio("sounds/hit.mp3");
 const scoreSound = new Audio("sounds/score.mp3");
-const bgmSound = new Audio("sounds/bgm.mp3");
+const bgmSound = new Audio("sounds/bgm.mp3"); // ✅ nhạc nền
 bgmSound.loop = true;
 bgmSound.volume = 0.3;
 
@@ -24,16 +24,12 @@ let gravity = 0.4, velocity = 0, jump = -7;
 let score = 0, gameOver = false, started = false;
 let pipes = [{ x: 400, y: -150 }];
 
-// 🟢 Bắt đầu / Nhảy
+// 🎮 Hàm nhảy hoặc bắt đầu game
 function flap() {
   if (!started) {
     started = true;
-
-    // 🔊 Chỉ phát nhạc khi người chơi đã tương tác (tránh bị chặn autoplay)
     bgmSound.currentTime = 0;
-    bgmSound.play().catch(() => {
-      console.warn("⚠️ Trình duyệt chặn autoplay, sẽ phát khi người chơi click thêm lần nữa");
-    });
+    bgmSound.play();
   } else if (!gameOver) {
     velocity = jump;
     flapSound.currentTime = 0;
@@ -41,7 +37,7 @@ function flap() {
   }
 }
 
-// 🖱️ + 📱 Điều khiển
+// 🖱️ + 📱 Sự kiện điều khiển
 if ("ontouchstart" in window) {
   canvas.addEventListener("touchstart", (e) => {
     e.preventDefault();
@@ -63,10 +59,11 @@ function resetGame() {
 
   bgmSound.pause();
   bgmSound.currentTime = 0;
+
   draw();
 }
 
-// 📤 Gửi điểm
+// 📤 Gửi điểm lên server
 async function sendScore(name, score) {
   try {
     const res = await fetch(`${BASE_URL}/submit/`, {
@@ -100,7 +97,14 @@ function showGameOver() {
   }
 }
 
-// 🏆 Bảng xếp hạng
+// 🔁 Nút chức năng
+document.getElementById("restartBtn").addEventListener("click", resetGame);
+document.getElementById("leaderboardBtn").addEventListener("click", async () => showLeaderboard());
+document.getElementById("closeLeaderboard").addEventListener("click", () => {
+  document.getElementById("leaderboard").classList.add("hidden");
+});
+
+// 🏆 Hiển thị bảng xếp hạng
 async function showLeaderboard() {
   document.getElementById("leaderboard").classList.remove("hidden");
   const list = document.getElementById("leaderboardList");
@@ -119,33 +123,6 @@ async function showLeaderboard() {
   }
 }
 
-// 🔁 Các nút
-document.getElementById("restartBtn").addEventListener("click", resetGame);
-document.getElementById("leaderboardBtn").addEventListener("click", showLeaderboard);
-document.getElementById("closeLeaderboard").addEventListener("click", () => {
-  document.getElementById("leaderboard").classList.add("hidden");
-});
-
-// 🎵 Thêm nút “Bật tiếng” để tránh bị chặn autoplay
-const unmuteBtn = document.createElement("button");
-unmuteBtn.textContent = "🔊 Bật tiếng";
-unmuteBtn.style.position = "absolute";
-unmuteBtn.style.top = "20px";
-unmuteBtn.style.right = "20px";
-unmuteBtn.style.zIndex = "1000";
-unmuteBtn.style.padding = "8px 14px";
-unmuteBtn.style.borderRadius = "8px";
-unmuteBtn.style.border = "none";
-unmuteBtn.style.background = "#ffd633";
-unmuteBtn.style.fontWeight = "bold";
-unmuteBtn.style.cursor = "pointer";
-document.body.appendChild(unmuteBtn);
-
-unmuteBtn.addEventListener("click", () => {
-  bgmSound.play();
-  unmuteBtn.remove();
-});
-
 // 🎮 Game loop
 function draw() {
   ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
@@ -162,7 +139,6 @@ function draw() {
 
   if (gameOver) return;
 
-  // Ống
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
     ctx.drawImage(pipeImg, p.x, p.y, 60, 300);
@@ -177,7 +153,6 @@ function draw() {
       scoreSound.play();
     }
 
-    // Va chạm
     if (
       (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY <= p.y + 300) ||
       (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY + 24 >= p.y + 420)
@@ -218,4 +193,18 @@ function draw() {
   requestAnimationFrame(draw);
 }
 
-draw();
+// 🎵 Bắt đầu game khi người dùng bấm nút (cho phép phát tiếng trên mobile)
+const startBtn = document.getElementById("startBtn");
+startBtn.addEventListener("click", () => {
+  bgmSound.currentTime = 0;
+  bgmSound.play()
+    .then(() => {
+      console.log("✅ Âm thanh khởi động thành công!");
+      startBtn.remove(); // Ẩn nút
+      draw(); // Bắt đầu game loop
+    })
+    .catch(err => {
+      alert("⚠️ Trình duyệt chặn âm thanh, hãy bấm lại!");
+      console.error(err);
+    });
+});
