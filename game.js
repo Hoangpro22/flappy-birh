@@ -10,6 +10,11 @@ const birdImg = new Image(); birdImg.src = "assets/bird.png";
 const groundImg = new Image(); groundImg.src = "assets/ground.png";
 const pipeImg = new Image(); pipeImg.src = "assets/pipe.png";
 
+// 🔊 Âm thanh
+const flapSound = new Audio("assets/sounds/flap.wav");
+const hitSound = new Audio("assets/sounds/hit.wav");
+const scoreSound = new Audio("assets/sounds/score.wav");
+
 // ⚙️ Biến game
 let birdX = 50, birdY = 200;
 let gravity = 0.4, velocity = 0, jump = -7;
@@ -22,13 +27,15 @@ function flap() {
     started = true;
   } else if (!gameOver) {
     velocity = jump;
+    flapSound.currentTime = 0;
+    flapSound.play();
   }
 }
 
 // 🖱️ + 📱 Sự kiện điều khiển — fix lỗi nhảy 2 lần
 if ("ontouchstart" in window) {
   canvas.addEventListener("touchstart", (e) => {
-    e.preventDefault();
+    e.preventDefault(); // chặn mousedown ảo
     flap();
   }, { passive: false });
 } else {
@@ -72,6 +79,7 @@ function showGameOver() {
   ctx.font = "24px Arial";
   ctx.fillText(`Điểm: ${score}`, canvas.width / 2 - 60, canvas.height / 2 + 20);
 
+  // 🟢 Lưu điểm nếu đã đăng nhập
   const username = localStorage.getItem("username");
   if (username) {
     sendScore(username, score);
@@ -81,9 +89,9 @@ function showGameOver() {
   }
 }
 
-// 🔘 Nút chức năng
+// 🔁 Nút chức năng
 document.getElementById("restartBtn").addEventListener("click", resetGame);
-document.getElementById("leaderboardBtn").addEventListener("click", showLeaderboard);
+document.getElementById("leaderboardBtn").addEventListener("click", async () => showLeaderboard());
 document.getElementById("closeLeaderboard").addEventListener("click", () => {
   document.getElementById("leaderboard").classList.add("hidden");
 });
@@ -114,6 +122,7 @@ const closeSettings = document.getElementById("closeSettings");
 
 settingsBtn.addEventListener("click", () => settingsMenu.classList.remove("hidden"));
 closeSettings.addEventListener("click", () => settingsMenu.classList.add("hidden"));
+
 document.getElementById("homeBtn").addEventListener("click", () => window.location.href = "index.html");
 document.getElementById("backBtn").addEventListener("click", () => history.back());
 document.getElementById("resetBtn").addEventListener("click", () => {
@@ -141,7 +150,7 @@ function draw() {
 
   if (gameOver) return;
 
-  // Ống
+  // Vẽ ống
   for (let i = 0; i < pipes.length; i++) {
     let p = pipes[i];
     ctx.drawImage(pipeImg, p.x, p.y, 60, 300);
@@ -149,13 +158,19 @@ function draw() {
 
     p.x -= 2;
     if (p.x === 200) pipes.push({ x: 400, y: Math.floor(Math.random() * -200) });
-    if (p.x + 60 === birdX) score++;
+    if (p.x + 60 === birdX) {
+      score++;
+      scoreSound.currentTime = 0;
+      scoreSound.play();
+    }
 
     // Va chạm
     if (
       (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY <= p.y + 300) ||
       (birdX + 34 >= p.x && birdX <= p.x + 60 && birdY + 24 >= p.y + 420)
     ) {
+      hitSound.currentTime = 0;
+      hitSound.play();
       gameOver = true;
     }
   }
@@ -165,7 +180,11 @@ function draw() {
   velocity += gravity;
   birdY += velocity;
 
-  if (birdY + 24 >= canvas.height - 100) gameOver = true;
+  if (birdY + 24 >= canvas.height - 100) {
+    hitSound.currentTime = 0;
+    hitSound.play();
+    gameOver = true;
+  }
 
   ctx.drawImage(groundImg, 0, canvas.height - 100, canvas.width, 100);
   ctx.drawImage(birdImg, birdX, birdY, 50, 35);
