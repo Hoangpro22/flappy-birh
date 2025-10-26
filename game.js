@@ -11,9 +11,9 @@ const groundImg = new Image(); groundImg.src = "assets/ground.png";
 const pipeImg = new Image(); pipeImg.src = "assets/pipe.png";
 
 // 🔊 Âm thanh (mp3)
-const flapSound = new Audio("sounds/flap.mp3");
-const hitSound = new Audio("sounds/hit.mp3");
-const scoreSound = new Audio("sounds/score.mp3");
+//const flapSound = new Audio("sounds/flap.mp3");
+//const hitSound = new Audio("sounds/hit.mp3");
+//const scoreSound = new Audio("sounds/score.mp3");
 const bgmSound = new Audio("sounds/bgm.mp3"); // ✅ nhạc nền
 bgmSound.loop = true;
 bgmSound.volume = 0.3;
@@ -208,3 +208,4 @@ startBtn.addEventListener("click", () => {
       console.error(err);
     });
 });
+
