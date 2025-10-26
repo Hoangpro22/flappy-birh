@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký</title>
+  <style>
+    body {
+      background: linear-gradient(180deg, #f6d365, #fda085);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; font-family: sans-serif;
+    }
+    .form-box {
+      background: #fff; padding: 30px; border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 300px; text-align: center;
+    }
+    input {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+    button {
+      background: #ff9800; color: white;
+      border: none; padding: 10px 20px;
+      border-radius: 8px; cursor: pointer;
+      width: 100%; font-weight: bold;
+    }
+    button:hover { background: #f57c00; }
+    .link { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Đăng ký</h2>
+    <input id="username" placeholder="Tên người dùng" />
+    <input id="password" type="password" placeholder="Mật khẩu" />
+    <button onclick="register()">Tạo tài khoản</button>
+    <p id="msg"></p>
+    <div class="link">
+      <a href="login.html">🔑 Đã có tài khoản? Đăng nhập</a>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:10000";
+
+    async function register() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("msg");
+      msg.textContent = "⏳ Đang xử lý...";
+
+      try {
+        const res = await fetch(`${API_URL}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.textContent = "✅ " + data.message;
+          msg.style.color = "green";
+          setTimeout(() => window.location.href = "login.html", 1000);
+        } else {
+          msg.textContent = "❌ " + data.detail;
+          msg.style.color = "red";
+        }
+      } catch (err) {
+        msg.textContent = "⚠️ Lỗi kết nối máy chủ!";
+        msg.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>

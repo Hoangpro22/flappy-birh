@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: linear-gradient(180deg, #89f7fe, #66a6ff);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; font-family: sans-serif;
+    }
+    .form-box {
+      background: #fff; padding: 30px; border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 300px; text-align: center;
+    }
+    input {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ccc; border-radius: 8px;
+    }
+    button {
+      background: #4caf50; color: white;
+      border: none; padding: 10px 20px;
+      border-radius: 8px; cursor: pointer;
+      width: 100%; font-weight: bold;
+    }
+    button:hover { background: #388e3c; }
+    .link { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="form-box">
+    <h2>Đăng nhập</h2>
+    <input id="username" placeholder="Tên người dùng" />
+    <input id="password" type="password" placeholder="Mật khẩu" />
+    <button onclick="login()">Đăng nhập</button>
+    <p id="msg"></p>
+    <div class="link">
+      <a href="register.html">📝 Chưa có tài khoản? Đăng ký</a>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "http://127.0.0.1:10000"; // ⚙️ Backend FastAPI
+
+    async function login() {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("msg");
+      msg.textContent = "⏳ Đang xử lý...";
+
+      try {
+        const res = await fetch(`${API_URL}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.textContent = "✅ " + data.message;
+          msg.style.color = "green";
+
+          // 💾 Lưu username để game và index lấy
+          localStorage.setItem("username", username);
+
+          console.log("Đăng nhập thành công -> chuyển sang index.html");
+          window.location.href = "index.html"; // 🔥 Chuyển ngay
+        } else {
+          msg.textContent = "❌ " + data.detail;
+          msg.style.color = "red";
+        }
+      } catch (err) {
+        msg.textContent = "⚠️ Lỗi kết nối máy chủ!";
+        msg.style.color = "red";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

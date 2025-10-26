@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Flappy Bird Việt Nam 🐦</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    font-family: "Poppins", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    background: url("assets/background.png") no-repeat center center;
+    background-size: cover;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.25);
+    z-index: 1;
+  }
+
+  h1 {
+    font-size: 40px;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    animation: fadeInDown 1s ease;
+    z-index: 2;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .bird {
+    width: 100px;
+    height: 100px;
+    animation: fly 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    z-index: 2;
+  }
+
+  @keyframes fly {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px) rotate(-2deg); }
+  }
+
+  .start-btn {
+    margin-top: 40px;
+    background: linear-gradient(135deg, #ffb300, #ff9100);
+    border: none;
+    border-radius: 40px;
+    font-size: 20px;
+    padding: 14px 50px;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+    transition: 0.3s;
+    animation: glowPulse 2s infinite;
+    z-index: 2;
+  }
+
+  .start-btn:hover { transform: scale(1.05); }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(255,255,255,0.6); }
+    50% { box-shadow: 0 0 30px rgba(255,255,255,0.9); }
+  }
+
+  #settingsBtn {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 22px;
+    background: rgba(255,255,255,0.3);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    color: #fff;
+    width: 48px; height: 48px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: 0.3s;
+    z-index: 5;
+  }
+
+  #settingsBtn:hover {
+    transform: rotate(90deg);
+    background: rgba(255,255,255,0.5);
+  }
+
+  #settingsMenu {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255,255,255,0.95);
+    border-radius: 16px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    padding: 25px;
+    width: 280px;
+    color: #333;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  #settingsMenu.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+  }
+
+  #settingsMenu button {
+    display: block;
+    width: 100%;
+    background: #ffb300;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  #settingsMenu button:hover { background: #ff9100; }
+
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 8;
+  }
+
+  #overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 🆕 Giao diện lời chào người dùng */
+  #welcomeBox {
+    position: absolute;
+    top: 15px; left: 20px;
+    z-index: 5;
+    font-size: 18px;
+    background: rgba(0,0,0,0.4);
+    padding: 8px 15px;
+    border-radius: 10px;
+  }
+
+  #logoutBtn {
+    margin-left: 10px;
+    background: rgba(255,255,255,0.3);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  #logoutBtn:hover { background: rgba(255,255,255,0.5); }
+</style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+  <button id="settingsBtn">⚙️</button>
+  <div id="overlay"></div>
+  <div id="welcomeBox"></div>
+
+  <h1>🐥 FLAPPY BIRD VIỆT NAM 🐥</h1>
+  <img src="assets/bird.png" alt="Bird" class="bird">
+  <button class="start-btn" onclick="startGame()">Bắt đầu chơi</button>
+
+  <div id="settingsMenu">
+    <h3>⚙️ Cài đặt</h3>
+    <button onclick="showHelp()">❔ Hướng dẫn</button>
+    <button onclick="toggleMusic()">🔊 Tắt/Mở nhạc</button>
+    <button onclick="closeSettings()">Đóng</button>
+  </div>
+
+  <script>
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsMenu = document.getElementById("settingsMenu");
+    const overlay = document.getElementById("overlay");
+
+    settingsBtn.addEventListener("click", () => {
+      settingsMenu.classList.add("show");
+      overlay.classList.add("show");
+    });
+    overlay.addEventListener("click", closeSettings);
+
+    function closeSettings() {
+      settingsMenu.classList.remove("show");
+      overlay.classList.remove("show");
+    }
+
+    function startGame() {
+      window.location.href = "game.html";
+    }
+
+    function toggleMusic() {
+      alert("🎵 Chức năng âm thanh sẽ được cập nhật sớm!");
+    }
+
+    function showHelp() {
+      alert("👉 Nhấn hoặc chạm để giúp chim bay qua ống, tránh va chạm để ghi điểm!");
+    }
+
+    // ✅ Kiểm tra đăng nhập (đọc đúng key)
+    const username = localStorage.getItem("username");
+    const box = document.getElementById("welcomeBox");
+
+    if (!username) {
+      // Chưa đăng nhập → quay lại trang login
+      window.location.href = "login.html";
+    } else {
+      // Đã đăng nhập → hiển thị lời chào
+      box.innerHTML = `👋 Xin chào, <b>${username}</b> 
+        <button id="logoutBtn" onclick="logout()">Đăng xuất</button>`;
+    }
+
+    function logout() {
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
