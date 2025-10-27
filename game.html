@@ -9,8 +9,26 @@
   <h1>🐥 Flappy Bird 🐥</h1>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
 
+  <!-- 🔊 Nút khởi động game & bật tiếng (bắt buộc trên điện thoại) -->
+  <button id="startBtn" style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    background: #ffd633;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+  ">
+    🎵 Bắt đầu trò chơi
+  </button>
 
-</button>
   <div class="buttons">
     <button id="restartBtn">🔁 Chơi lại</button>
     <button id="leaderboardBtn">🏆 Bảng xếp hạng</button>
@@ -47,6 +65,18 @@
   <script src="game.js"></script>
 
   <script>
+    // 🎵 Thêm âm thanh nền
+    const bgMusic = new Audio("assets/bg-music.mp3"); // Đặt file trong thư mục assets/
+    bgMusic.loop = true;
+    bgMusic.volume = 0.5;
+
+    // ⚡️ Chỉ phát khi người dùng bấm nút bắt đầu
+    document.getElementById("startBtn").addEventListener("click", () => {
+      bgMusic.play().catch(err => console.log("Âm thanh chưa được phép phát:", err));
+      document.getElementById("startBtn").style.display = "none";
+      if (typeof startGame === "function") startGame();
+    });
+
     // ✅ KIỂM TRA NGƯỜI DÙNG ĐÃ ĐĂNG NHẬP CHƯA
     const username = localStorage.getItem("username");
     if (!username) {
@@ -107,7 +137,7 @@
       const playerName = localStorage.getItem("username");
       if (!playerName) return;
 
-      fetch("http://127.0.0.1:8000/save_score", {  // 🔧 Đổi sang API backend của bạn nếu cần
+      fetch("https://lappy-bird-backend.onrender.com/save_score", { // ✅ dùng API Render
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: playerName, score: score }),
@@ -117,7 +147,6 @@
       .catch(err => console.error("❌ Lỗi lưu điểm:", err));
     }
 
-    // ⚡️ GẮN HÀM TOÀN CỤC CHO GAME.JS GỌI
     window.saveScoreAutomatically = saveScoreAutomatically;
 
     // ---------- HIỂN THỊ BẢNG XẾP HẠNG ----------
@@ -125,7 +154,7 @@
       const list = document.getElementById("leaderboardList");
       list.innerHTML = "<li>⏳ Đang tải...</li>";
       try {
-        const res = await fetch("http://127.0.0.1:8000/scores"); // ⚙️ endpoint lấy điểm
+        const res = await fetch("https://lappy-bird-backend.onrender.com/scores"); // ✅ dùng API Render
         const data = await res.json();
         list.innerHTML = data
           .map((p, i) => `<li>${i + 1}. <b>${p.name}</b> — ${p.score} điểm</li>`)
@@ -138,5 +167,3 @@
   </script>
 </body>
 </html>
-
-
